@@ -1,33 +1,63 @@
 # Unity Project Bootstrap Knowledge
 
-这是一个给 AI 和团队成员复用的 Unity 新项目启动知识库。它来自 `TF_2D` 项目执行过程中的真实经验：建立 Git 基线、设置 Unity `.gitignore` 和 LFS 策略、保留原始版本、完成目录重构、处理 UGit/GitHub 网络连接问题，并把这些操作沉淀成可重复执行的流程。
+这是一个给 AI 和团队成员复用的 Unity 新项目启动知识库。它沉淀了 `TF_2D` 项目的真实执行经验：Git 基线、Unity 目录重构、GitHub/UGit 网络问题处理，以及本机 SVN 美术大资源库搭建。
 
-## 这个仓库解决什么问题
+## 知识地图
 
-当一个新的 Unity 游戏项目要进入长期开发时，先做三件事：
+```text
+unity-project-bootstrap-knowledge/
+  AGENTS.md                         # AI 总入口规则
+  docs/
+    index.md                        # 分类导航和执行顺序
+    new-unity-project-runbook.md    # Unity Git 基线和目录重构
+    svn-art-repository-runbook.md   # 本机 SVN 美术大资源库
+    art-and-lfs-policy.md           # 美术资源与 Git LFS 策略
+    environment-setup.md            # Windows/GitHub/SVN 环境
+    tf2d-case-study.md              # TF_2D 真实案例复盘
+  checklists/
+    preflight.md                    # Git 基线执行前检查
+    verification.md                 # Git 基线执行后验证
+    svn-art-repository.md           # SVN 美术库检查清单
+  templates/
+    unity.gitignore                 # Unity Git 忽略模板
+    unity.gitattributes             # Unity Git LFS 模板
+    project-layout.md               # Unity 目录模板
+  prompts/
+    new-project-bootstrap.md        # Git 基线/重构提示词
+    setup-local-svn-art-repository.md # SVN 美术库提示词
+```
 
-1. 建立干净的 Git 基线，确保任何重构都可回退。
-2. 明确哪些内容进 Git，哪些留在本地，尤其是大型美术源文件。
-3. 把 Unity 项目目录从“能运行”整理成“团队可以长期维护”。
+## AI 先读什么
 
-## AI 应该先读什么
-
-- `AGENTS.md`：给 AI 的总规则，适合作为新项目任务前置上下文。
-- `docs/new-unity-project-runbook.md`：从零开始执行 Git 基线和目录重构的步骤。
-- `docs/tf2d-case-study.md`：TF_2D 这次操作的正确动作、问题和解决方法。
-- `checklists/preflight.md`：执行前检查。
-- `checklists/verification.md`：执行后验证。
-- `templates/`：可复制的 `.gitignore`、`.gitattributes` 和目录规范模板。
-
-## 快速使用
-
-把 `AGENTS.md` 的内容交给 AI，然后让 AI 按 `docs/new-unity-project-runbook.md` 执行。每一步都必须先验证当前状态，再做变更；涉及 GitHub 远端、分支、标签、目录移动时，要留下清晰提交记录。
+| 场景 | 先读 |
+| --- | --- |
+| 新 Unity 项目要进 GitHub | `AGENTS.md` + `docs/new-unity-project-runbook.md` |
+| 要给项目加本机 SVN 美术资源库 | `docs/svn-art-repository-runbook.md` |
+| 不确定美术资源该进 Git 还是留本地 | `docs/art-and-lfs-policy.md` |
+| 要复盘 TF_2D 当时怎么做的 | `docs/tf2d-case-study.md` |
+| 要直接给 AI 一段可执行提示词 | `prompts/` |
 
 ## 核心原则
 
-- 先保存原始基线，再做目录重构。
-- Unity 资源移动优先通过 Unity Editor 或保留 `.meta` 的方式完成。
-- 不提交 `Library/`、`Temp/`、`Logs/`、`UserSettings/` 和 IDE 生成文件。
-- 游戏实际使用的导入后资源可以进仓库；庞大的美术源文件、素材库和历史导出默认留在本地或独立资产库。
-- 大型二进制资源如果必须进入 Git，使用 Git LFS，并提前确认仓库容量和团队下载成本。
-- 遇到 GitHub 连接问题，先确认代理、认证和 Git/UGit 使用的是同一套网络配置。
+- 先提交 Unity 原始 Git 基线，再做目录重构。
+- `.gitignore` 和 `.gitattributes` 放在 Unity 项目根目录。
+- 不提交 `Library/`、`Temp/`、`Logs/`、`UserSettings/`、IDE 生成文件或构建产物。
+- Git 管 Unity 工程本体；SVN 可以独立管理美术源文件、大资源、参考资料和历史交付。
+- SVN 工作副本不要放进 Unity Git 工程。
+- 美术库目录结构不要替用户过早设计，除非用户明确要求。
+- 遇到 GitHub、UGit、SVN 网络或权限问题，先做局部修复和清晰记录，不要随意改全局配置。
+
+## 快速入口
+
+让 AI 执行新项目 Git 基线：
+
+```text
+请读取 AGENTS.md，然后按 docs/new-unity-project-runbook.md 执行。
+```
+
+让 AI 给项目建立本机 SVN 美术库：
+
+```text
+请按 docs/svn-art-repository-runbook.md 建立本机 SVN 美术大资源库。
+不要预设业务目录结构，目录由我以后自己定义。
+```

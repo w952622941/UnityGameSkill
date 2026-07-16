@@ -192,6 +192,60 @@ The second command should output nothing.
 - Git repo-local proxy configured in `F:\AI_Game\TF_2D\.git\config`.
 - Git LFS patterns configured through `.gitattributes`.
 
+## Follow-up: Local SVN Art Repository
+
+After the Git baseline and project restructure, a separate local SVN repository was created for art and large source assets.
+
+Final SVN state:
+
+- SVN repository path: `E:\SVN\Repositories\TF_2D_Art`
+- SVN working copy: `E:\SVNWork\TF_2D_Art`
+- SVN URL: `file:///E:/SVN/Repositories/TF_2D_Art`
+- Initial committed revision: `1`
+- Initial hotcopy backup: `E:\SVN\Backups\TF_2D_Art-r1-hotcopy`
+
+Tools installed:
+
+- VisualSVN Server
+- Slik Subversion
+- TortoiseSVN
+
+Important decision:
+
+- No business folders were created in SVN.
+- No `trunk/branches/tags` structure was created.
+- The user will define the art repository structure later.
+- The SVN working copy stays outside the Unity Git project.
+
+Problem encountered:
+
+VisualSVN Server was installed and running, but changing its service-level repository root required elevated permission and failed with:
+
+```text
+Cannot open registry key HKEY_LOCAL_MACHINE\SOFTWARE\VisualSVN\VisualSVN Server: Access is denied.
+```
+
+Solution:
+
+For the current single-machine use case, use a local `file:///` repository created by `svnadmin`:
+
+```powershell
+& 'C:\Program Files\SlikSvn\bin\svnadmin.exe' create 'E:\SVN\Repositories\TF_2D_Art'
+& 'C:\Program Files\SlikSvn\bin\svn.exe' checkout 'file:///E:/SVN/Repositories/TF_2D_Art' 'E:\SVNWork\TF_2D_Art'
+```
+
+Then set root-level generic rules only:
+
+- `svn:auto-props` for common large binary files with `svn:needs-lock`.
+- `svn:global-ignores` for temporary files.
+
+The Unity Git project was updated with:
+
+- `Docs/SVNArtWorkflow.md`
+- `/.svn/` in `.gitignore`
+
+This records the Git/SVN boundary without putting SVN content into the Unity project.
+
 ## Reusable Lessons
 
 - Establish baseline first; restructure second.
@@ -201,3 +255,4 @@ The second command should output nothing.
 - If a GUI Git client fails, reproduce the operation with CLI and inspect proxy/auth settings.
 - Prefer repo-local fixes when solving machine-specific network problems.
 - Final verification must include both Git state and Unity project health.
+- When SVN is used for art, keep it independent from the Unity Git project and avoid inventing business folders before the user needs them.

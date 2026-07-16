@@ -16,6 +16,7 @@ Optional but recommended:
 - Git LFS
 - Visual Studio or Rider for C# editing
 - A project-specific local proxy configuration when GitHub access requires it
+- VisualSVN Server, Slik Subversion, and TortoiseSVN when the project uses a local SVN art repository
 
 ## GitHub CLI Location
 
@@ -88,3 +89,22 @@ git init -b main
 ```
 
 Then add Markdown docs, commit, create the GitHub private repository, and push.
+
+## Local SVN Art Repository Tools
+
+For a local SVN art repository, install:
+
+```powershell
+winget install --id VisualSVNSoftwareLtd.VisualSVNServer --silent --accept-package-agreements --accept-source-agreements --disable-interactivity
+winget install --id Slik.Subversion --silent --accept-package-agreements --accept-source-agreements --disable-interactivity
+winget install --id TortoiseSVN.TortoiseSVN --silent --accept-package-agreements --accept-source-agreements --disable-interactivity
+```
+
+If the current PowerShell session does not find `svn` after installation, call the tools by full path:
+
+```powershell
+& 'C:\Program Files\SlikSvn\bin\svn.exe' --version --quiet
+& 'C:\Program Files\SlikSvn\bin\svnadmin.exe' help
+```
+
+Use `docs/svn-art-repository-runbook.md` for the full setup process.

@@ -10,7 +10,7 @@ Turn an existing Unity project into a maintainable team project without losing t
 2. Tag the baseline before any structural changes.
 3. Restructure the Unity project in a separate branch.
 4. Preserve Unity `.meta` GUIDs and serialized references.
-5. Keep heavyweight source art and asset libraries out of the normal code repository unless the team intentionally chooses Git LFS or a dedicated asset repository.
+5. Keep heavyweight source art and asset libraries out of the normal code repository unless the team intentionally chooses Git LFS, a dedicated asset repository, or a separate SVN art repository.
 
 ## Operating Rules
 
@@ -23,6 +23,7 @@ Turn an existing Unity project into a maintainable team project without losing t
 - Use short-lived branches for structural work, for example `chore/project-structure`.
 - Verify after each major move: Git status, Unity compile, build settings scenes, missing scripts, and asset reference health.
 - Do not expose tokens or secrets in logs, docs, commits, or screenshots.
+- If setting up SVN for art assets, keep the SVN working copy outside the Unity Git project and do not create business folders unless the user explicitly asks.
 
 ## Standard Sequence
 
@@ -38,11 +39,27 @@ Turn an existing Unity project into a maintainable team project without losing t
 10. Merge the restructure branch back to `main`.
 11. Run `checklists/verification.md`.
 
+## Optional Sequence: Local SVN Art Repository
+
+Use this only when the user wants SVN for art or large assets.
+
+1. Read `docs/svn-art-repository-runbook.md`.
+2. Run `checklists/svn-art-repository.md`.
+3. Install or verify VisualSVN Server, Slik Subversion, and TortoiseSVN.
+4. Create a local empty SVN repository outside the Unity Git project.
+5. Create a working copy outside the Unity Git project.
+6. Set only general SVN rules such as binary locking and temporary-file ignores.
+7. Do not create `trunk/branches/tags` or business folders unless the user asks.
+8. Verify with `svnadmin verify`, `svn status`, and `svn info`.
+9. Create a local hotcopy backup.
+10. Document the Git/SVN boundary in the Unity Git project.
+
 ## Decision Rules For Art Assets
 
 - Game-ready assets that Unity scenes, prefabs, materials, or ScriptableObjects actually reference can be tracked in the project repository.
 - Large binary assets should use Git LFS when they must be shared through Git.
 - Editable source art, raw PSD/PSB/Aseprite/Blend files, reference packs, purchased asset archives, experiments, and historical exports should default to local storage or a dedicated team asset library.
+- If the user wants local SVN, put source art and large assets in the SVN working copy, not inside the Unity Git project.
 - If the team chooses to track large art sources, make that a conscious policy decision and document capacity, locking, and ownership rules.
 
 ## If GitHub Or UGit Cannot Connect
