@@ -15,6 +15,7 @@ unity-project-bootstrap-knowledge/
     game-server-authority.md             # 权威服务器、协议、反作弊、账本与性能
     verified-local-battle.md             # 本地即时模拟 + 服务器重放验证
     data-operations-and-cloud.md          # Excel、运营数据、部署与云迁移
+    cloud-game-server-deployment-runbook.md # ECS/Docker/HTTPS/WSS 实战部署与排障
     svn-art-repository-runbook.md        # 本地 SVN 美术大资源库
     art-and-lfs-policy.md                 # 美术资源与 Git LFS 策略
     tf2d-case-study.md                    # TF_2D 真实案例复盘
@@ -40,6 +41,7 @@ unity-project-bootstrap-knowledge/
 | 要做实时战斗、结算和反作弊 | `docs/game-server-authority.md` |
 | 要处理摇杆、重连、Android 或 DIAG | `docs/unity-client-networking.md` |
 | 要接 Excel、运营后台或迁移云服务器 | `docs/data-operations-and-cloud.md` |
+| 要实际搭建云游戏服务器、HTTPS/WSS 或排障 | `docs/cloud-game-server-deployment-runbook.md` |
 | 要建立本地 SVN 美术资源库 | `docs/svn-art-repository-runbook.md` |
 | 要直接给 AI 一段可执行提示词 | `prompts/` |
 

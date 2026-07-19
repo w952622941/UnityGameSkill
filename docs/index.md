@@ -30,6 +30,7 @@ flowchart TD
 | 权威服务器 | `game-server-authority.md` | WSS、固定 Tick、租约、反作弊、账本、Outbox |
 | Verified Local | `verified-local-battle.md` | 本地即时战斗、证据上传、服务器重放校验 |
 | 数据与云 | `data-operations-and-cloud.md` | Excel 编译、运营事件、可迁移部署 |
+| 云服务器实战 | `cloud-game-server-deployment-runbook.md` | ECS、Docker、TLS/WSS、续期、排障、回滚 |
 | 在线游戏验收 | `../checklists/online-game-acceptance.md` | 真机、弱网、回放、结算和发布门槛 |
 | SVN 美术库 | `svn-art-repository-runbook.md` | 本地 SVN 仓库、工作副本、锁定与备份 |
 | 美术策略 | `art-and-lfs-policy.md` | Git、LFS、SVN 与本地资产边界 |
@@ -44,7 +45,8 @@ flowchart TD
 3. `game-server-authority.md`：定义协议、服务器权威、终局与账本。
 4. 普通单人 PvE 再读 `verified-local-battle.md`，用影子双运行迁移。
 5. `data-operations-and-cloud.md`：接入配置、运营数据和可替换基础设施。
-6. `../checklists/online-game-acceptance.md`：用 Release、真机和弱网完成验收。
+6. `cloud-game-server-deployment-runbook.md`：把后端部署为可迁移的 HTTPS/WSS 服务。
+7. `../checklists/online-game-acceptance.md`：用 Release、真机和弱网完成验收。
 
 ## Git/Unity 推荐执行顺序
 
