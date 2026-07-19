@@ -52,6 +52,16 @@ Use this sequence when the project includes online accounts, cloud saves, networ
 7. Implement cross-runtime deterministic golden tests before switching settlement authority.
 8. Run `checklists/online-game-acceptance.md` on real Android devices and weak networks.
 
+### Connected Unity Editor Development
+
+When developers have only the Unity client checkout and must use an already deployed backend, read `docs/unity-editor-connected-development.md` before implementation. Keep these distinctions explicit:
+
+- Editor platform simulation replaces channel or device SDK dependencies; it does not replace game account authentication.
+- Editor asset simulation replaces local CDN/bundle preparation; it does not prove the Player delivery path.
+- Client-local battle simulation does not authorize permanent rewards.
+- A `Local` endpoint often means an external server at `127.0.0.1`; it is not evidence of an embedded or offline server.
+- Static inspection, Editor Play, disconnected Play, clean-clone import, Development Player, and Release checks are separate evidence levels.
+
 ### Online Game Trust Rules
 
 - The client may calculate presentation or local deterministic simulation, but it must not author permanent rewards.
