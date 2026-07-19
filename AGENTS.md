@@ -39,6 +39,28 @@ Turn an existing Unity project into a maintainable team project without losing t
 10. Merge the restructure branch back to `main`.
 11. Run `checklists/verification.md`.
 
+## Optional Sequence: Unity Online Game Foundation
+
+Use this sequence when the project includes online accounts, cloud saves, networked battles, server-verified rewards, anti-cheat, or operations analytics.
+
+1. Read `docs/online-game-architecture.md` and choose the authority mode per gameplay type.
+2. Read `docs/unity-client-networking.md` before changing input, prediction, presentation, recovery, or Android lifecycle code.
+3. Read `docs/game-server-authority.md` before defining battle protocols, settlement, ledgers, reconnect, or anti-cheat.
+4. For ordinary single-player PvE, evaluate `docs/verified-local-battle.md` to remove RTT from controls without trusting client rewards.
+5. Read `docs/data-operations-and-cloud.md` for Excel configuration, analytics, secrets, deployment, and cloud migration.
+6. Implement cross-runtime deterministic golden tests before switching settlement authority.
+7. Run `checklists/online-game-acceptance.md` on real Android devices and weak networks.
+
+### Online Game Trust Rules
+
+- The client may calculate presentation or local deterministic simulation, but it must not author permanent rewards.
+- Accept intents or replayable evidence from the client; derive damage, death, drops, terminal state, and settlement on the server.
+- Use fixed ticks, versioned simulation/content, deterministic RNG, monotonic sequences, bounded queues, leases, and idempotency.
+- Persist terminal state, the asset ledger, and Outbox events atomically.
+- Treat platform integrity, obfuscation, APK hashes, root/emulator signals, and IP reputation as risk signals, not sole authority.
+- Keep secrets out of Git, APKs, logs, screenshots, diagnostics, and prompts.
+- Label unimplemented transport or infrastructure choices as future options, never as verified results.
+
 ## Optional Sequence: Local SVN Art Repository
 
 Use this only when the user wants SVN for art or large assets.
@@ -95,3 +117,4 @@ After login, verify with:
 - A reviewed restructure commit or merge commit.
 - Documentation explaining structure, Git workflow, and art policy.
 - Verification evidence from Git and Unity.
+- For online games: an authority decision per gameplay type, protocol/version contract, deterministic tests, real-device weak-network evidence, idempotent settlement, actionable DIAG, and a rollback plan.

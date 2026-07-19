@@ -256,3 +256,34 @@ This records the Git/SVN boundary without putting SVN content into the Unity pro
 - Prefer repo-local fixes when solving machine-specific network problems.
 - Final verification must include both Git state and Unity project health.
 - When SVN is used for art, keep it independent from the Unity Git project and avoid inventing business folders before the user needs them.
+
+## Follow-up: Verified Mobile Online Battle Architecture
+
+The same project later exposed a second class of reusable problems on a Huawei Android 10 device: high-latency movement, monsters snapping, stuck joystick input, delayed settlement, second-battle state leakage, and client/server replay divergence.
+
+### What Did Not Work
+
+- Driving a realtime battle through repeated HTTPS requests over a temporary tunnel. Around 600 ms RTT made the player and monsters visibly stall and jump.
+- Queueing every joystick sample. Network delay turned old directions into future movement.
+- Treating cloud-save balance as the authoritative economy.
+- Calling Unity path APIs from a background save task.
+- Measuring replay performance with a Debug server build.
+- Assuming equal source configuration meant equal runtime configuration; one serialized direction table arrived as an empty object and caused deterministic divergence.
+
+### Methods That Were Verified
+
+1. Ordinary single-player PvE moved to Verified Local: the client runs the fixed-tick battle immediately, uploads bounded input evidence and checkpoints, and the server replays from Tick 0 before granting rewards.
+2. The client/server deterministic core uses versioned rules, deterministic RNG, stable serialization, and exact cross-runtime golden hashes.
+3. Joystick movement uses a latest-state mailbox and writes zero on pointer release/cancel, focus loss, pause, disable, and destroy.
+4. Battle terminal state, asset ledger, and Outbox events are idempotent and atomic on the server.
+5. DIAG exposes the first divergent Tick, input/ack cursors, versions, hashes, evidence batches, verification state, entity counts, displayed/earned currency, and stage timings.
+6. Each new battle resets HUD, level, skill modal, timers, generators, input cursors, evidence, terminal, and continuation state.
+7. Terminal UI is shown as soon as the terminal fact is known; the later asset refresh does not block it.
+
+### Evidence
+
+- DIAG identified the first replay divergence at Tick 20 and traced it to a 3600-entry direction table serialized as an empty object. Fixing the transport property and adding a cross-runtime test allowed the Android battle to verify and settle 50 gold correctly.
+- A 2607-Tick replay originally took about 10.47 seconds in Debug. Release publication plus sparse replay snapshots reduced core replay to about 1.83 seconds while preserving all 130 checkpoints and the final hash.
+- The backend suite passed 100 tests, the Unity suite passed 115 tests, and the authority validation suite passed after the fixes.
+
+These results are evidence for the methods, not universal latency promises. New games must repeat the deterministic, weak-network, device, security, and settlement checks in `checklists/online-game-acceptance.md`.
