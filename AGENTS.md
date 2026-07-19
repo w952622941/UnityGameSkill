@@ -48,8 +48,9 @@ Use this sequence when the project includes online accounts, cloud saves, networ
 3. Read `docs/game-server-authority.md` before defining battle protocols, settlement, ledgers, reconnect, or anti-cheat.
 4. For ordinary single-player PvE, evaluate `docs/verified-local-battle.md` to remove RTT from controls without trusting client rewards.
 5. Read `docs/data-operations-and-cloud.md` for Excel configuration, analytics, secrets, deployment, and cloud migration.
-6. Implement cross-runtime deterministic golden tests before switching settlement authority.
-7. Run `checklists/online-game-acceptance.md` on real Android devices and weak networks.
+6. Read `docs/cloud-game-server-deployment-runbook.md` before provisioning or changing a public game server, TLS/WSS gateway, certificate renewal, or cloud rollback path.
+7. Implement cross-runtime deterministic golden tests before switching settlement authority.
+8. Run `checklists/online-game-acceptance.md` on real Android devices and weak networks.
 
 ### Online Game Trust Rules
 
