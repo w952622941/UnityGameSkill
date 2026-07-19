@@ -1,53 +1,68 @@
 # Unity Project Bootstrap Knowledge
 
-这是一个给 AI 和团队成员复用的 Unity 新项目启动知识库。它沉淀了 `TF_2D` 项目的真实执行经验：Git 基线、Unity 目录重构、GitHub/UGit 网络问题处理，以及本机 SVN 美术大资源库搭建。
+这是一个给 AI 和团队成员复用的 Unity 项目启动知识库。内容来自 TF_2D 的真实执行与真机验证：Git 基线、Unity 目录重构、美术资源管理，以及手机网游的客户端/服务器架构、确定性战斗、反作弊、结算、运营数据和云迁移。
 
 ## 知识地图
 
 ```text
 unity-project-bootstrap-knowledge/
-  AGENTS.md                         # AI 总入口规则
+  AGENTS.md                              # AI 总入口与不可违反的规则
   docs/
-    index.md                        # 分类导航和执行顺序
-    new-unity-project-runbook.md    # Unity Git 基线和目录重构
-    svn-art-repository-runbook.md   # 本机 SVN 美术大资源库
-    art-and-lfs-policy.md           # 美术资源与 Git LFS 策略
-    environment-setup.md            # Windows/GitHub/SVN 环境
-    tf2d-case-study.md              # TF_2D 真实案例复盘
+    index.md                             # 分类导航和执行顺序
+    new-unity-project-runbook.md         # Unity Git 基线与目录重构
+    online-game-architecture.md          # 客户端/服务器总体架构与模式选择
+    unity-client-networking.md           # Unity 输入、表现、恢复、Android 与 DIAG
+    game-server-authority.md             # 权威服务器、协议、反作弊、账本与性能
+    verified-local-battle.md             # 本地即时模拟 + 服务器重放验证
+    data-operations-and-cloud.md          # Excel、运营数据、部署与云迁移
+    svn-art-repository-runbook.md        # 本地 SVN 美术大资源库
+    art-and-lfs-policy.md                 # 美术资源与 Git LFS 策略
+    tf2d-case-study.md                    # TF_2D 真实案例复盘
   checklists/
-    preflight.md                    # Git 基线执行前检查
-    verification.md                 # Git 基线执行后验证
-    svn-art-repository.md           # SVN 美术库检查清单
-  templates/
-    unity.gitignore                 # Unity Git 忽略模板
-    unity.gitattributes             # Unity Git LFS 模板
-    project-layout.md               # Unity 目录模板
+    preflight.md                         # Git 基线执行前检查
+    verification.md                      # Git 基线执行后验证
+    online-game-acceptance.md            # 真机、弱网、结算与安全验收
+    svn-art-repository.md                # SVN 美术库检查清单
   prompts/
-    new-project-bootstrap.md        # Git 基线/重构提示词
-    setup-local-svn-art-repository.md # SVN 美术库提示词
+    new-project-bootstrap.md             # Git 基线/重构提示词
+    build-unity-online-game-foundation.md # 手机网游基础架构提示词
+    setup-local-svn-art-repository.md    # SVN 美术库提示词
+  templates/                             # 可复制的 Git/Unity 模板
 ```
 
 ## AI 先读什么
 
 | 场景 | 先读 |
 | --- | --- |
-| 新 Unity 项目要进 GitHub | `AGENTS.md` + `docs/new-unity-project-runbook.md` |
-| 要给项目加本机 SVN 美术资源库 | `docs/svn-art-repository-runbook.md` |
-| 不确定美术资源该进 Git 还是留本地 | `docs/art-and-lfs-policy.md` |
-| 要复盘 TF_2D 当时怎么做的 | `docs/tf2d-case-study.md` |
+| 新 Unity 项目要进入 GitHub | `AGENTS.md` + `docs/new-unity-project-runbook.md` |
+| 要设计手机网游客户端/服务器 | `docs/online-game-architecture.md` |
+| 单人 PvE 操作被高延迟拖慢 | `docs/verified-local-battle.md` |
+| 要做实时战斗、结算和反作弊 | `docs/game-server-authority.md` |
+| 要处理摇杆、重连、Android 或 DIAG | `docs/unity-client-networking.md` |
+| 要接 Excel、运营后台或迁移云服务器 | `docs/data-operations-and-cloud.md` |
+| 要建立本地 SVN 美术资源库 | `docs/svn-art-repository-runbook.md` |
 | 要直接给 AI 一段可执行提示词 | `prompts/` |
 
 ## 核心原则
 
 - 先提交 Unity 原始 Git 基线，再做目录重构。
-- `.gitignore` 和 `.gitattributes` 放在 Unity 项目根目录。
-- 不提交 `Library/`、`Temp/`、`Logs/`、`UserSettings/`、IDE 生成文件或构建产物。
-- Git 管 Unity 工程本体；SVN 可以独立管理美术源文件、大资源、参考资料和历史交付。
-- SVN 工作副本不要放进 Unity Git 工程。
-- 美术库目录结构不要替用户过早设计，除非用户明确要求。
-- 遇到 GitHub、UGit、SVN 网络或权限问题，先做局部修复和清晰记录，不要随意改全局配置。
+- 保留 `.meta` GUID，不提交 Unity 生成目录和构建产物。
+- 客户端负责输入与即时表现，永久奖励由服务器模拟或重放校验后结算。
+- 普通单人 PvE 可使用 Verified Local 消除 RTT 手感影响；PVP/多人/高风险玩法采用服务器实时权威。
+- 固定 Tick、确定性 RNG、版本化内容、幂等终局和不可变资产账本是战斗可信的基础。
+- 移动输入使用“最新状态邮箱”，不积压每个摇杆采样点；生命周期结束必须归零。
+- 生产实时通道使用固定域名和持久 WSS；Quick Tunnel 只用于临时验收。
+- Excel 源文件在项目外，经严格校验生成客户端/服务器不同产物，并用内容哈希固定战斗规则。
+- 运营统计通过事务 Outbox 消费权威事实，分析系统不能直接修改资产。
+- 所有结论以自动化测试、Release 基准、Android 真机和弱网证据为准。
 
 ## 快速入口
+
+让 AI 建立手机网游基础架构：
+
+```text
+请读取 AGENTS.md 和 prompts/build-unity-online-game-foundation.md，先审计现状并制定分阶段计划，再按 checklists/online-game-acceptance.md 验收。
+```
 
 让 AI 执行新项目 Git 基线：
 
@@ -55,9 +70,8 @@ unity-project-bootstrap-knowledge/
 请读取 AGENTS.md，然后按 docs/new-unity-project-runbook.md 执行。
 ```
 
-让 AI 给项目建立本机 SVN 美术库：
+让 AI 建立本地 SVN 美术库：
 
 ```text
-请按 docs/svn-art-repository-runbook.md 建立本机 SVN 美术大资源库。
-不要预设业务目录结构，目录由我以后自己定义。
+请按 docs/svn-art-repository-runbook.md 建立本地 SVN 美术大资源库。不要预设业务目录结构，目录由我以后定义。
 ```
