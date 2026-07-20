@@ -16,6 +16,7 @@ unity-project-bootstrap-knowledge/
     verified-local-battle.md             # 本地即时模拟 + 服务器重放验证
     data-operations-and-cloud.md          # Excel、运营数据、部署与云迁移
     cloud-game-server-deployment-runbook.md # ECS/Docker/HTTPS/WSS 实战部署与排障
+    server-performance-concurrency.md     # 服务端降耗、容量、过载保护与扩展方法
     svn-art-repository-runbook.md        # 本地 SVN 美术大资源库
     art-and-lfs-policy.md                 # 美术资源与 Git LFS 策略
     tf2d-case-study.md                    # TF_2D 真实案例复盘
@@ -42,6 +43,7 @@ unity-project-bootstrap-knowledge/
 | 要处理摇杆、重连、Android 或 DIAG | `docs/unity-client-networking.md` |
 | 要接 Excel、运营后台或迁移云服务器 | `docs/data-operations-and-cloud.md` |
 | 要实际搭建云游戏服务器、HTTPS/WSS 或排障 | `docs/cloud-game-server-deployment-runbook.md` |
+| 要降低服务端消耗、提高并发或做容量规划 | `docs/server-performance-concurrency.md` |
 | 要建立本地 SVN 美术资源库 | `docs/svn-art-repository-runbook.md` |
 | 要直接给 AI 一段可执行提示词 | `prompts/` |
 
@@ -57,6 +59,7 @@ unity-project-bootstrap-knowledge/
 - Excel 源文件在项目外，经严格校验生成客户端/服务器不同产物，并用内容哈希固定战斗规则。
 - 运营统计通过事务 Outbox 消费权威事实，分析系统不能直接修改资产。
 - 所有结论以自动化测试、Release 基准、Android 真机和弱网证据为准。
+- 性能优化先建立真实负载基线；优先修复热点与无界资源，再做缓存、异步和扩容，最后才考虑内核、NUMA、分片等高风险深调。
 
 ## 快速入口
 
@@ -76,4 +79,10 @@ unity-project-bootstrap-knowledge/
 
 ```text
 请按 docs/svn-art-repository-runbook.md 建立本地 SVN 美术大资源库。不要预设业务目录结构，目录由我以后定义。
+```
+
+让 AI 优化服务器容量：
+
+```text
+请读取 AGENTS.md 和 docs/server-performance-concurrency.md。先审计现状、建立可复现容量基线并定位前三个瓶颈，再按 P0→P1→P2 选择有证据支持的改造；每项给出风险、验证和回滚，不要盲调参数。
 ```
