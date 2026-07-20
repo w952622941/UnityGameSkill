@@ -49,8 +49,9 @@ Use this sequence when the project includes online accounts, cloud saves, networ
 4. For ordinary single-player PvE, evaluate `docs/verified-local-battle.md` to remove RTT from controls without trusting client rewards.
 5. Read `docs/data-operations-and-cloud.md` for Excel configuration, analytics, secrets, deployment, and cloud migration.
 6. Read `docs/cloud-game-server-deployment-runbook.md` before provisioning or changing a public game server, TLS/WSS gateway, certificate renewal, or cloud rollback path.
-7. Implement cross-runtime deterministic golden tests before switching settlement authority.
-8. Run `checklists/online-game-acceptance.md` on real Android devices and weak networks.
+7. Read `docs/server-performance-concurrency.md` before capacity optimization, load testing, concurrency tuning, caching, database scaling, overload protection, or autoscaling work.
+8. Implement cross-runtime deterministic golden tests before switching settlement authority.
+9. Run `checklists/online-game-acceptance.md` on real Android devices, weak networks, and representative server load.
 
 ### Online Game Trust Rules
 
@@ -61,6 +62,7 @@ Use this sequence when the project includes online accounts, cloud saves, networ
 - Treat platform integrity, obfuscation, APK hashes, root/emulator signals, and IP reputation as risk signals, not sole authority.
 - Keep secrets out of Git, APKs, logs, screenshots, diagnostics, and prompts.
 - Label unimplemented transport or infrastructure choices as future options, never as verified results.
+- Establish a reproducible capacity baseline before optimization. Keep every queue, pool, cache, retry, payload, and timeout bounded; validate changes with stable throughput, p95/p99, error rate, and resource-per-request rather than average latency alone.
 
 ## Optional Sequence: Local SVN Art Repository
 

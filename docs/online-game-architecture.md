@@ -79,4 +79,4 @@ flowchart LR
 5. 实现服务器验证、账本、Outbox、风控信号和运营投影。
 6. 执行 `checklists/online-game-acceptance.md`，真机和弱网未通过不得宣称完成。
 
-继续阅读：`unity-client-networking.md`、`game-server-authority.md`、`verified-local-battle.md`、`data-operations-and-cloud.md`。
+继续阅读：`unity-client-networking.md`、`game-server-authority.md`、`verified-local-battle.md`、`data-operations-and-cloud.md`、`server-performance-concurrency.md`。
