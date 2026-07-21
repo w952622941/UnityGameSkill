@@ -45,13 +45,14 @@ Use this sequence when the project includes online accounts, cloud saves, networ
 
 1. Read `docs/online-game-architecture.md` and choose the authority mode per gameplay type.
 2. Read `docs/unity-client-networking.md` before changing input, prediction, presentation, recovery, or Android lifecycle code.
-3. Read `docs/game-server-authority.md` before defining battle protocols, settlement, ledgers, reconnect, or anti-cheat.
-4. For ordinary single-player PvE, evaluate `docs/verified-local-battle.md` to remove RTT from controls without trusting client rewards.
-5. Read `docs/data-operations-and-cloud.md` for Excel configuration, analytics, secrets, deployment, and cloud migration.
-6. Read `docs/cloud-game-server-deployment-runbook.md` before provisioning or changing a public game server, TLS/WSS gateway, certificate renewal, or cloud rollback path.
-7. Read `docs/server-performance-concurrency.md` before capacity optimization, load testing, concurrency tuning, caching, database scaling, overload protection, or autoscaling work.
-8. Implement cross-runtime deterministic golden tests before switching settlement authority.
-9. Run `checklists/online-game-acceptance.md` on real Android devices, weak networks, and representative server load.
+3. For an active gameplay, movement, resume, settlement, Android, DIAG, or latency incident, read `docs/online-game-incident-response.md` and follow its evidence-first loop before tuning thresholds.
+4. Read `docs/game-server-authority.md` before defining battle protocols, settlement, ledgers, reconnect, or anti-cheat.
+5. For ordinary single-player PvE, evaluate `docs/verified-local-battle.md` to remove RTT from controls without trusting client rewards.
+6. Read `docs/data-operations-and-cloud.md` for Excel configuration, analytics, secrets, deployment, and cloud migration.
+7. Read `docs/cloud-game-server-deployment-runbook.md` before provisioning or changing a public game server, TLS/WSS gateway, certificate renewal, or cloud rollback path.
+8. Read `docs/server-performance-concurrency.md` before capacity optimization, load testing, concurrency tuning, caching, database scaling, overload protection, or autoscaling work.
+9. Implement cross-runtime deterministic golden tests before switching settlement authority.
+10. Run `checklists/online-game-acceptance.md` on real Android devices, weak networks, and representative server load.
 
 ### Online Game Trust Rules
 
@@ -62,6 +63,8 @@ Use this sequence when the project includes online accounts, cloud saves, networ
 - Treat platform integrity, obfuscation, APK hashes, root/emulator signals, and IP reputation as risk signals, not sole authority.
 - Keep secrets out of Git, APKs, logs, screenshots, diagnostics, and prompts.
 - Label unimplemented transport or infrastructure choices as future options, never as verified results.
+- Diagnose movement and presentation incidents with same-frame input, authority, prediction, Transform, UI, and pause evidence; reproduce the observed magnitude in a deterministic failing test before fixing.
+- Distinguish current source, current automation, actual deployment state, and exact-build device observations; never let historical chat override newer evidence.
 - Establish a reproducible capacity baseline before optimization. Keep every queue, pool, cache, retry, payload, and timeout bounded; validate changes with stable throughput, p95/p99, error rate, and resource-per-request rather than average latency alone.
 
 ## Optional Sequence: Local SVN Art Repository
@@ -120,4 +123,4 @@ After login, verify with:
 - A reviewed restructure commit or merge commit.
 - Documentation explaining structure, Git workflow, and art policy.
 - Verification evidence from Git and Unity.
-- For online games: an authority decision per gameplay type, protocol/version contract, deterministic tests, real-device weak-network evidence, idempotent settlement, actionable DIAG, and a rollback plan.
+- For online games: an authority decision per gameplay type, protocol/version contract, deterministic tests, real-device weak-network evidence, idempotent settlement, actionable DIAG, an incident evidence chain, and a rollback plan.
