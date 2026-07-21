@@ -13,6 +13,7 @@ flowchart TD
   N --> M{"战斗模式"}
   M --> V["普通单人 PvE：Verified Local"]
   M --> R["PVP/多人/高风险：Realtime Authority"]
+  N --> I["故障同帧取证与确定性复现"]
   N --> D["配置、运营数据与云部署"]
   N --> P["服务端性能、容量与过载保护"]
   G --> GC["Git 验证清单"]
@@ -28,6 +29,7 @@ flowchart TD
 | Git 基线 | `new-unity-project-runbook.md` | GitHub、基线标签、目录重构 |
 | 总体网游架构 | `online-game-architecture.md` | 模式选择、信任边界、实施顺序 |
 | Unity 客户端 | `unity-client-networking.md` | 输入邮箱、预测/插值、恢复、Android、DIAG |
+| 故障诊断闭环 | `online-game-incident-response.md` | 同帧取证、首个分歧、确定性红测、最小修复和真机签收 |
 | 权威服务器 | `game-server-authority.md` | WSS、固定 Tick、租约、反作弊、账本、Outbox |
 | Verified Local | `verified-local-battle.md` | 本地即时战斗、证据上传、服务器重放校验 |
 | 数据与云 | `data-operations-and-cloud.md` | Excel 编译、运营事件、可迁移部署 |
@@ -38,18 +40,20 @@ flowchart TD
 | 美术策略 | `art-and-lfs-policy.md` | Git、LFS、SVN 与本地资产边界 |
 | 环境搭建 | `environment-setup.md` | GitHub CLI、代理、SVN 工具和路径习惯 |
 | 案例复盘 | `tf2d-case-study.md` | TF_2D 已验证问题、方法和结果 |
+| 完整工程实证 | `tf2d-engineering-handbook.md` | TF_2D 架构、云端、压测、故障证据和 AI 复用手册 |
 | AI 提示词 | `../prompts/` | 可直接交给 AI 的任务入口 |
 
 ## 手机网游推荐执行顺序
 
 1. `online-game-architecture.md`：按玩法决定权威模式。
 2. `unity-client-networking.md`：建立输入、表现、生命周期和诊断边界。
-3. `game-server-authority.md`：定义协议、服务器权威、终局与账本。
-4. 普通单人 PvE 再读 `verified-local-battle.md`，用影子双运行迁移。
-5. `data-operations-and-cloud.md`：接入配置、运营数据和可替换基础设施。
-6. `cloud-game-server-deployment-runbook.md`：把后端部署为可迁移的 HTTPS/WSS 服务。
-7. `server-performance-concurrency.md`：建立容量基线，实施有证据的降耗、过载保护和扩展方案。
-8. `../checklists/online-game-acceptance.md`：用 Release、真机、弱网和代表性服务端负载完成验收。
+3. `online-game-incident-response.md`：出现移动、弹窗、恢复、结算、Android 或 DIAG 故障时，先建立同帧证据和确定性复现。
+4. `game-server-authority.md`：定义协议、服务器权威、终局与账本。
+5. 普通单人 PvE 再读 `verified-local-battle.md`，用影子双运行迁移。
+6. `data-operations-and-cloud.md`：接入配置、运营数据和可替换基础设施。
+7. `cloud-game-server-deployment-runbook.md`：把后端部署为可迁移的 HTTPS/WSS 服务。
+8. `server-performance-concurrency.md`：建立容量基线，实施有证据的降耗、过载保护和扩展方案。
+9. `../checklists/online-game-acceptance.md`：用 Release、真机、弱网和代表性服务端负载完成验收。
 
 ## Git/Unity 推荐执行顺序
 
