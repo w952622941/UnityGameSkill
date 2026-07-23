@@ -11,6 +11,7 @@ unity-project-bootstrap-knowledge/
     index.md                             # 分类导航和执行顺序
     new-unity-project-runbook.md         # Unity Git 基线与目录重构
     online-game-architecture.md          # 客户端/服务器总体架构与模式选择
+    unity-editor-connected-development.md # Editor 本地资源/平台适配 + 仓库外后端
     unity-client-networking.md           # Unity 输入、表现、恢复、Android 与 DIAG
     online-game-incident-response.md      # 在线故障同帧取证、确定性复现与修复闭环
     game-server-authority.md             # 权威服务器、协议、反作弊、账本与性能
@@ -42,6 +43,7 @@ unity-project-bootstrap-knowledge/
 | 新 Unity 项目要进入 GitHub | `AGENTS.md` + `docs/new-unity-project-runbook.md` |
 | Git/UGit 推送失败但 GitHub API 仍可用 | `docs/environment-setup.md`：先分离诊断，再使用受控发布回退 |
 | 要设计手机网游客户端/服务器 | `docs/online-game-architecture.md` |
+| 只有客户端工程，要在 Editor 连接已部署后端运行 | `docs/unity-editor-connected-development.md` |
 | 单人 PvE 操作被高延迟拖慢 | `docs/verified-local-battle.md` |
 | 要做实时战斗、结算和反作弊 | `docs/game-server-authority.md` |
 | 要处理摇杆、重连、Android 或 DIAG | `docs/unity-client-networking.md` |
@@ -82,6 +84,12 @@ unity-project-bootstrap-knowledge/
 
 ```text
 请读取 AGENTS.md，然后按 docs/new-unity-project-runbook.md 执行。
+```
+
+让 AI 建立只有客户端工程的 Editor 联网开发模式：
+
+```text
+请读取 AGENTS.md 和 docs/unity-editor-connected-development.md，先审计启动、平台、资源、环境和后端依赖，再按文档分阶段实施并验证。
 ```
 
 让 AI 建立本地 SVN 美术库：
