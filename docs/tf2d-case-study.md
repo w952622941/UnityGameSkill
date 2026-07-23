@@ -305,7 +305,33 @@ A statement such as “this server supports N battles” is meaningless unless t
 - connection activity, request sizes and weak-network behavior;
 - p50/p95/p99 latency, error rate, CPU, RSS, GC, database and network saturation.
 
-On the tested 4-vCPU/8-GiB integration ECS and then-current software/data state, **15 concurrent battles were used as a soft operating ceiling and 20 as a temporary hard ceiling**. The 30/50/100 runs exceeded acceptable behavior. These numbers are a historical measurement, not a portable promise: repeat the same Release workload after every material code, content, database or instance change.
+The first tested 4-vCPU/8-GiB integration state used **15 concurrent battles as a soft operating ceiling and 20 as a temporary hard ceiling**; the original 30/50/100 breakpoint runs exceeded acceptable behavior. Those values are historical, not the final R10 result.
+
+A later R10 optimization cycle corrected a hidden workload error: early “180-second” tests stopped being fully loaded when battles ended after roughly 60–86 seconds. The load generator was changed to replace terminal battles until the common deadline. Under that sustained model, the Stage33 integration image produced:
+
+| Load | Result | p95 | API CPU average / peak | Decision |
+| --- | ---: | ---: | ---: | --- |
+| 30 × 180 seconds | 30/30 | 150.15 ms | 51.83% / 84.11% | Green target |
+| 35 × 120 seconds, qualifier + three repeats | all 35/35 | 149.90–150.32 ms | peak 78.12–84.63% | Green, thin margin |
+| 40 × 120 seconds, first round | 40/40 | 150.48 ms | 57.73% / 98.86% | Red; stop |
+
+The 40-battle sample is the useful lesson: business success and a healthy p95 did not override a failed resource gate. The team stopped the remaining 40-battle rounds and did not run 45/50. Thirty battles became the operating-planning target; 35 remained an experimental edge, not comfortable capacity.
+
+At the time this knowledge was recorded, the Stage33 image was built from an isolated, uncommitted TF_2D R10 worktree and had not been merged into the TF_2D `main` branch. This preserves the distinction between deployed evidence and repository state.
+
+### Zero-Rule-Change Methods That Moved the Boundary
+
+- replace 25-ms full database/checkpoint scans with startup recovery, an in-memory active registry and low-frequency ID reconciliation;
+- keep one deterministic simulation resident per battle instead of decoding/rebuilding it every Tick;
+- separate private 20-Hz state from 10-Hz presentation encoding while preserving urgent events;
+- use stable logical lanes with bounded global simulation/checkpoint slots and single-writer ownership per battle;
+- atomically merge heartbeat/control updates so an older snapshot cannot overwrite a newer Tick;
+- narrow movement SQL to required fields, reuse resident authoritative state for reliable commands and enable bounded prepared statements;
+- decouple database heartbeat persistence from WSS snapshot publication;
+- pool canonical JSON, envelope and gzip buffers; reuse proven delta/checksum work without changing wire bytes;
+- replace repeated candidate scans with result-equivalent direction hulls and resident projectile collections.
+
+None of these methods reduced spawn counts, movement/skill rules, Tick, snapshot/input cadence, projectile checks, animation timing or anti-cheat validation. More aggressive concurrency, a one-round-trip movement candidate and a value-type enemy snapshot were rejected when measurements or correctness risk did not justify them.
 
 ### Database Retention Before Performance Conclusions
 

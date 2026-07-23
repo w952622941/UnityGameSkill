@@ -9,7 +9,8 @@
 4. docs/game-server-authority.md
 5. docs/verified-local-battle.md
 6. docs/data-operations-and-cloud.md
-7. checklists/online-game-acceptance.md
+7. docs/server-performance-concurrency.md
+8. checklists/online-game-acceptance.md
 
 先检查现有代码、协议、测试、部署和 Git 状态，不要假设项目已经采用某种架构。给每个玩法明确选择 Verified Local、Authoritative Realtime 或 Pre-settled Playback，并解释选择依据。
 
@@ -24,6 +25,8 @@
 - Excel 源文件在项目外，通过校验编译为客户端/服务器不同产物并固定内容哈希。
 - 云环境可替换：客户端只使用稳定域名，秘密不进 Git、APK、日志或聊天。
 - Android 真机、弱网、重连、第二场战斗状态隔离和 DIAG 都必须验收。
+- 容量优化先固定 Tick、快照/输入、刷怪、移动、技能、投射物、动作、预测、恢复和反作弊不变量；改变它们前必须取得项目所有者确认。
+- 长稳负载在战斗终局后持续补位；业务成功率和 CPU/GC/数据库等资源门槛分别判定，任一红线都停止上探。
 
 先输出：现状证据、威胁模型、架构决策、分阶段迁移计划、测试矩阵、回滚点。得到实施授权后按阶段开发；每阶段都运行测试并报告真实结果。不得把尚未测试的功能描述为完成，也不得为了通过哈希校验而放宽确定性标准。
 ```
