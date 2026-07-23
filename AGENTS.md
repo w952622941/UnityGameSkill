@@ -118,6 +118,8 @@ After login, verify with:
 & 'E:\GitHub\gh.exe' auth status
 ```
 
+If `git push`/`ls-remote` repeatedly times out but `gh api user` succeeds, treat Git transport and API connectivity as separate evidence. First verify the active repo-local proxy and try one bounded HTTP/1.1 compatibility attempt. With explicit publication authorization, a clean intended scope, and a new non-default branch, the Git Data API is an advanced fallback: create blobs → tree → commit → branch ref, verify blob/tree/ref and PR file hashes, and never write `main` directly. Read `docs/environment-setup.md` for the full recovery sequence.
+
 ## Expected Deliverables
 
 - A clean `main` branch.

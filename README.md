@@ -40,6 +40,7 @@ unity-project-bootstrap-knowledge/
 | 场景 | 先读 |
 | --- | --- |
 | 新 Unity 项目要进入 GitHub | `AGENTS.md` + `docs/new-unity-project-runbook.md` |
+| Git/UGit 推送失败但 GitHub API 仍可用 | `docs/environment-setup.md`：先分离诊断，再使用受控发布回退 |
 | 要设计手机网游客户端/服务器 | `docs/online-game-architecture.md` |
 | 单人 PvE 操作被高延迟拖慢 | `docs/verified-local-battle.md` |
 | 要做实时战斗、结算和反作弊 | `docs/game-server-authority.md` |
