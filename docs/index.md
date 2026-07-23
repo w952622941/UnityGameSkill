@@ -34,7 +34,7 @@ flowchart TD
 | Verified Local | `verified-local-battle.md` | 本地即时战斗、证据上传、服务器重放校验 |
 | 数据与云 | `data-operations-and-cloud.md` | Excel 编译、运营事件、可迁移部署 |
 | 云服务器实战 | `cloud-game-server-deployment-runbook.md` | ECS、Docker、TLS/WSS、续期、排障、回滚 |
-| 服务端性能与并发 | `server-performance-concurrency.md` | 负载基线、热点治理、缓存、数据库、背压、扩缩容和底层调优 |
+| 服务端性能与并发 | `server-performance-concurrency.md` | 负载基线、热点治理、缓存、数据库、背压、扩缩容，以及 TF_2D 零规则变更实战 |
 | 在线游戏验收 | `../checklists/online-game-acceptance.md` | 真机、弱网、回放、结算和发布门槛 |
 | SVN 美术库 | `svn-art-repository-runbook.md` | 本地 SVN 仓库、工作副本、锁定与备份 |
 | 美术策略 | `art-and-lfs-policy.md` | Git、LFS、SVN 与本地资产边界 |
@@ -52,7 +52,7 @@ flowchart TD
 5. 普通单人 PvE 再读 `verified-local-battle.md`，用影子双运行迁移。
 6. `data-operations-and-cloud.md`：接入配置、运营数据和可替换基础设施。
 7. `cloud-game-server-deployment-runbook.md`：把后端部署为可迁移的 HTTPS/WSS 服务。
-8. `server-performance-concurrency.md`：建立容量基线，实施有证据的降耗、过载保护和扩展方案。
+8. `server-performance-concurrency.md`：先固定体验/反作弊不变量和持续补位负载，再实施有证据的降耗、过载保护和扩展方案。
 9. `../checklists/online-game-acceptance.md`：用 Release、真机、弱网和代表性服务端负载完成验收。
 
 ## Git/Unity 推荐执行顺序

@@ -17,7 +17,7 @@ unity-project-bootstrap-knowledge/
     verified-local-battle.md             # 本地即时模拟 + 服务器重放验证
     data-operations-and-cloud.md          # Excel、运营数据、部署与云迁移
     cloud-game-server-deployment-runbook.md # ECS/Docker/HTTPS/WSS 实战部署与排障
-    server-performance-concurrency.md     # 服务端降耗、容量、过载保护与扩展方法
+    server-performance-concurrency.md     # 服务端降耗、容量、过载保护，以及 TF_2D 零规则变更实战
     svn-art-repository-runbook.md        # 本地 SVN 美术大资源库
     art-and-lfs-policy.md                 # 美术资源与 Git LFS 策略
     tf2d-case-study.md                    # TF_2D 真实案例复盘
@@ -47,7 +47,7 @@ unity-project-bootstrap-knowledge/
 | 在线问题反复修补仍无法定位根因 | `docs/online-game-incident-response.md` |
 | 要接 Excel、运营后台或迁移云服务器 | `docs/data-operations-and-cloud.md` |
 | 要实际搭建云游戏服务器、HTTPS/WSS 或排障 | `docs/cloud-game-server-deployment-runbook.md` |
-| 要降低服务端消耗、提高并发或做容量规划 | `docs/server-performance-concurrency.md` |
+| 要降低服务端消耗、提高并发或做容量规划 | `docs/server-performance-concurrency.md`：通用方法 + TF_2D Stage33 实战 |
 | 要查看 TF_2D 完整实证、压测数据和修复证据 | `docs/tf2d-engineering-handbook.md` |
 | 要建立本地 SVN 美术资源库 | `docs/svn-art-repository-runbook.md` |
 | 要直接给 AI 一段可执行提示词 | `prompts/` |
@@ -66,6 +66,8 @@ unity-project-bootstrap-knowledge/
 - 所有结论以自动化测试、Release 基准、Android 真机和弱网证据为准。
 - 运动、恢复和弹窗问题要在同一帧记录输入、权威、预测、Transform 与 UI/暂停状态；先重现真实数量级，再做最小修复。
 - 性能优化先建立真实负载基线；优先修复热点与无界资源，再做缓存、异步和扩容，最后才考虑内核、NUMA、分片等高风险深调。
+- 实时战斗优先做“零规则变更”降耗：少查数据库、常驻模拟状态、复用编码缓冲、减少重复校验和计算；不得用降 Tick、降输入/快照频率或减少实体伪造容量。
+- 长稳压测必须在战斗终局后持续补位，并把业务成功率与 CPU/GC/数据库等资源门槛分别判定；任一红线都停止上探。
 
 ## 快速入口
 
@@ -90,7 +92,7 @@ unity-project-bootstrap-knowledge/
 让 AI 优化服务器容量：
 
 ```text
-请读取 AGENTS.md 和 docs/server-performance-concurrency.md。先审计现状、建立可复现容量基线并定位前三个瓶颈，再按 P0→P1→P2 选择有证据支持的改造；每项给出风险、验证和回滚，不要盲调参数。
+请读取 AGENTS.md 和 docs/server-performance-concurrency.md。先固定玩家体验、反作弊和持久化不变量，再建立终局持续补位的容量基线并定位前三个瓶颈。优先实施零规则变更的 P0/P1 改造；每次只改一个变量，给出风险、正确性验证、资源门槛和回滚，任一门槛变红就停止上探。
 ```
 
 让 AI 诊断在线游戏故障：
