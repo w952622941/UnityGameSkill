@@ -317,7 +317,7 @@ A later R10 optimization cycle corrected a hidden workload error: early “180-s
 
 The 40-battle sample is the useful lesson: business success and a healthy p95 did not override a failed resource gate. The team stopped the remaining 40-battle rounds and did not run 45/50. Thirty battles became the operating-planning target; 35 remained an experimental edge, not comfortable capacity.
 
-At the time this knowledge was recorded, the Stage33 image was built from an isolated, uncommitted TF_2D R10 worktree and had not been merged into the TF_2D `main` branch. This preserves the distinction between deployed evidence and repository state.
+The 2026-07-25 repository audit found a split state: TF_2D `main` already contains the first zero-rule-change pass, durable pause and AOI through ancestor commit `397c617`, while the later Stage33 advanced scheduling/runtime/encoding changes came from an isolated uncommitted worktree and still have no reproducible source commit. The Stage33 image proves the method and that image's result; it does not prove a fresh build from current `main` has the same capacity.
 
 ### Zero-Rule-Change Methods That Moved the Boundary
 
