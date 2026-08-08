@@ -292,6 +292,73 @@ TF_2D Stage33 在同一台 4 vCPU / 8 GiB Integration ECS、同一持续补位�
 
 事实边界：以上 Stage33 结果来自 TF_2D 隔离 R10 工作树构建并部署的 Integration 镜像；截至 2026-07-23，相关源码尚未提交/合并到 TF_2D `main`。它证明方法和该镜像的测试结果，不证明 TF_2D `main` 已包含实现。
 
+## 13.8 2026-08-08 TF_2D VerifiedLocal 500 场认证复盘
+
+这一轮的目标不是“把数字刷高”，而是在不改变玩家体验和反作弊边界的前提下，证明一台 2 vCPU / 4 GiB 阿里云 ECS 可以稳定承载 500 场 VerifiedLocal 战斗的服务器验证/结算压力。结论只适用于当时的 TF_2D 源码、数据、压测工具、部署镜像和实例规格；不要把它复制成其它项目的默认容量。
+
+### 不变量先写清楚
+
+- 真实玩家模型：客户端按代表性节奏执行登录、开战、20 Hz 本地模拟、5 秒 evidence flush、终局提交和 0.5 秒 verification polling。
+- 客户端仍不可信：永久资产、胜负、掉落、结算由服务器 replay/settlement 决定；优化不能让客户端提交可信伤害、死亡或奖励。
+- 正式认证走公网路径：Nginx/HTTPS、真实 API、PostgreSQL、Replay Worker 和完整数据库迁移一起参与。
+- 长稳态必须补位：战斗终局后继续启动替补战斗直到统一截止时间，不能把“首批战斗跑完后的空窗”当成并发稳定。
+- 判定门槛独立：100% 客户端成功和 0 rejected 只是业务门槛；request P95、verification P95、CPU、内存、GC、PostgreSQL、重启、OOM、pending backlog 任一变红都不能通过。
+
+### 遇到的问题
+
+| 问题/现象 | 真实含义 | 处理方式 |
+| --- | --- | --- |
+| 公网 preflight 多次 HTTP P95 超门槛，但 ECS 本机 readiness 很快 | 公网/负载源路径有连接尾延迟，不能直接归因 API 或数据库 | 保留 preflight 红证据；诊断跑可以 `SkipNetworkPreflight`，正式认证不能跳过 |
+| cloud-local/同机生成器可以跑通 100/200，但 request P95 和宿主 CPU 被生成器污染 | colocated load generator 是诊断，不是公网认证 | 标注为 diagnostic-only；正式结论只用公网路径和严格采样 |
+| 500x120 早期跑法业务全绿但 request P95 红 | 吞吐正确不等于玩家体验合格 | 拆分 sustained 与 drain，保留红色 run，不用旧结果补写通过 |
+| PowerShell 5.1 聚合脚本把 UTF-8 注释/换行处理错，导致 request percentiles 被算成 0 | 报告工具 bug 会伪造“完美延迟” | 加 fail-closed timeline/percentile guard，并用真实样本重算 sidecar；原始错误报告不重写 |
+| 统一截止后 evidence/completion 会形成 drain wave | 截止波峰和稳态容量是两个不同阶段 | 报告分 phase：ramp、sustained、drain；drain 红不能掩盖 sustained，sustained 绿也不能抹掉 drain |
+| 750 场和部分 500 候选业务成功但 host CPU 红 | 资源门槛比业务成功更严格 | 停止上探，保留为负证据；不把 750/1000 写成已认证 |
+
+### 试过但没有成为最终方案的方法
+
+- 把 selected-character/permanent-upgrade loadout 合成单条 `LEFT JOIN`/aggregate SQL：真实 ECS 指标没有优于旧方案，且 store/commit 变差；回滚。
+- 把 API/Replay 数据库池从 70/20 改成 90/10：request 略变但 verification P95 变红；回滚。
+- 硬切 completion 专用连接池：破坏共享池弹性，500/200 诊断没有形成可认证收益；回滚。
+- 25 ms replay pacing：降低了某些瞬时压力，但 500 正式认证 host CPU 变红；回滚到 15 ms。
+- 只看 aggregate passed 或单轮成功：容易把公网尾延迟、drain wave、资源红线隐藏掉；改成严格 per-minute 和 phase-aware 判定。
+
+### 最终生效的组合
+
+| 层面 | 最终有效做法 | 为什么有效 |
+| --- | --- | --- |
+| 负载模型 | 公网 500x600，120 秒 ramp，600 秒 sustained，终局持续补位，gp25 generator split | 模拟真实玩家并保持长时间并发，不让空窗稀释指标 |
+| Replay Worker | concurrency=2，pacing=15 ms | 把 replay 写入/验证压力摊平，避免 completion/evidence 波峰把 CPU 和数据库推红 |
+| 数据库连接 | API 最大池 70，Replay 最大池 20，保留在 PostgreSQL 普通连接容量内 | 避免“调大连接数”把瓶颈转移成上下文切换和数据库争用 |
+| Completion 提交 | `INSERT ... RETURNING` 成功路径直接返回 queue state，避免成功后再走 duplicate/fallback | 去掉无意义 extra read，让 completion hot path 可观测且更稳定 |
+| Evidence append | 单语句 CTE 先看 accepted 标志再判 duplicate/conflict | 保留原子 cursor advance，同时避免把成功插入误判为冲突 |
+| Loadout 读取 | Npgsql batching 发送两个简单 SELECT，不复活失败 aggregate 查询 | 减少 RTT，又保留可预测执行计划 |
+| Session lookup | `token_hash = $1::char(64)` 让 PostgreSQL 使用 `auth_sessions_pkey` | 避免 text 参数让 planner 走 expiry/filter 路径 |
+| 压测工具 | 严格 shard PID 等待、5 秒采样到 terminal live=0、拒绝复用 run id、精确断言 clients/shards/Verified/errors/resource gates | 防止采样提前退出、复用旧报告、或把缺样本当绿 |
+| 报告 | 保留失败候选、preflight 红证据、drain 红证据和恢复检查 | 下一轮 AI 不会把一次“看起来成功”的数字误读成可运营容量 |
+
+### 最终认证结果
+
+最终部署为 `current-source-20260808-replay-pacing-r48`，Replay Worker concurrency=2，pacing=15 ms。三轮连续公网 500x600 正式认证通过：
+
+| Run | 客户端 | Verified / Rejected | Request P95 | Verification P95 | 判定 |
+| --- | ---: | ---: | ---: | ---: | --- |
+| r14 | 500/500 | 11442 / 0 | 40.0977 ms | 1070.988 ms | PASS |
+| r15 | 500/500 | 11465 / 0 | 36.0703 ms | 573.1934 ms | PASS |
+| r16 | 500/500 | 11456 / 0 | 37.9878 ms | 699.0264 ms | PASS |
+
+三轮结束后均确认 gateway/API/replay/database healthy，restart=0，OOM=false，无 pending/verifying backlog。随后服务器恢复到 r48/15 ms；公网 health window 通过，HTTP P95 39.714 ms。
+
+### 可复用执行顺序
+
+1. 先写下体验和信任边界：Tick、flush、poll、settlement、资产账本、反作弊和恢复语义不得为容量让路。
+2. 固定同一源码、镜像、数据库、内容版本、实例规格、负载源和公网入口；每次只改一个候选。
+3. 先跑 preflight 和 1x60 calibration；红了就不要启动正式容量 ladder。
+4. 诊断可以用 cloud-local 或 skip preflight，但必须标注 diagnostic-only，不能替代认证。
+5. 正式 ladder 使用长稳态补位；按 minute/phase 同时报告业务、延迟、资源和 backlog。
+6. 任一门槛变红，停止上探并保留负证据；不要用更高并发的一次偶然业务成功覆盖资源红线。
+7. 通过后恢复正常网关/连接配置，审计 restart/OOM/backlog/健康检查，并把最终部署指针、参数和回滚边界写入 runbook。
+
 ## 14. 针对目标项目仍需补充的信息
 
 要把本清单变成精确改造方案，至少需要：服务端语言/运行时及版本、网关和协议、数据库/缓存/消息队列、容器与云环境、现有实例规格、峰值在线与活跃比例、消息频率和大小、核心 SLO、压测报告、CPU/内存/GC/慢 SQL/网络指标。仓库当前没有这些材料，因此本文没有给出任何未经验证的线程数、连接数、缓存大小或内核参数值。
