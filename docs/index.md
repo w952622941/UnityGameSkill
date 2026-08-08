@@ -9,6 +9,7 @@ flowchart TD
   A["Unity 项目"] --> B{"当前目标"}
   B --> G["Git 基线与目录重构"]
   B --> N["手机网游客户端/服务器"]
+  B --> E["Unity Editor 联网开发模式"]
   B --> S["SVN 美术资源库"]
   N --> M{"战斗模式"}
   M --> V["普通单人 PvE：Verified Local"]
@@ -28,6 +29,7 @@ flowchart TD
 | AI 总规则 | `../AGENTS.md` | 所有任务先读取的总约束 |
 | Git 基线 | `new-unity-project-runbook.md` | GitHub、基线标签、目录重构 |
 | 总体网游架构 | `online-game-architecture.md` | 模式选择、信任边界、实施顺序 |
+| Editor 联网开发 | `unity-editor-connected-development.md` | 仅检出客户端工程，连接仓库外后端运行完整开发流程 |
 | Unity 客户端 | `unity-client-networking.md` | 输入邮箱、预测/插值、恢复、Android、DIAG |
 | 故障诊断闭环 | `online-game-incident-response.md` | 同帧取证、首个分歧、确定性红测、最小修复和真机签收 |
 | 权威服务器 | `game-server-authority.md` | WSS、固定 Tick、租约、反作弊、账本、Outbox |
@@ -46,14 +48,15 @@ flowchart TD
 ## 手机网游推荐执行顺序
 
 1. `online-game-architecture.md`：按玩法决定权威模式。
-2. `unity-client-networking.md`：建立输入、表现、生命周期和诊断边界。
-3. `online-game-incident-response.md`：出现移动、弹窗、恢复、结算、Android 或 DIAG 故障时，先建立同帧证据和确定性复现。
-4. `game-server-authority.md`：定义协议、服务器权威、终局与账本。
-5. 普通单人 PvE 再读 `verified-local-battle.md`，用影子双运行迁移。
-6. `data-operations-and-cloud.md`：接入配置、运营数据和可替换基础设施。
-7. `cloud-game-server-deployment-runbook.md`：把后端部署为可迁移的 HTTPS/WSS 服务。
-8. `server-performance-concurrency.md`：先固定体验/反作弊不变量和持续补位负载，再实施有证据的降耗、过载保护和扩展方案。
-9. `../checklists/online-game-acceptance.md`：用 Release、真机、弱网和代表性服务端负载完成验收。
+2. 需要客户端开发机不运行服务端时，读 `unity-editor-connected-development.md`，建立 Editor 平台/资源适配与远程后端链路。
+3. `unity-client-networking.md`：建立输入、表现、生命周期和诊断边界。
+4. `online-game-incident-response.md`：出现移动、弹窗、恢复、结算、Android 或 DIAG 故障时，先建立同帧证据和确定性复现。
+5. `game-server-authority.md`：定义协议、服务器权威、终局与账本。
+6. 普通单人 PvE 再读 `verified-local-battle.md`，用影子双运行迁移。
+7. `data-operations-and-cloud.md`：接入配置、运营数据和可替换基础设施。
+8. `cloud-game-server-deployment-runbook.md`：把后端部署为可迁移的 HTTPS/WSS 服务。
+9. `server-performance-concurrency.md`：先固定体验/反作弊不变量和持续补位负载，再实施有证据的降耗、过载保护和扩展方案。
+10. `../checklists/online-game-acceptance.md`：用 Release、真机、弱网和代表性服务端负载完成验收。
 
 ## Git/Unity 推荐执行顺序
 
