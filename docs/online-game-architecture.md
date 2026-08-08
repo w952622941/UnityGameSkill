@@ -77,6 +77,7 @@ flowchart LR
 3. 定义版本化协议、幂等、租约、终局和结算事务。
 4. 实现 Unity 输入生命周期、表现层和 DIAG。
 5. 实现服务器验证、账本、Outbox、风控信号和运营投影。
-6. 执行 `checklists/online-game-acceptance.md`，真机和弱网未通过不得宣称完成。
+6. 需要容量规划时读取 `server-performance-concurrency.md`，先固定体验/反作弊不变量，再建立终局持续补位的长稳基线。
+7. 执行 `checklists/online-game-acceptance.md`，真机、弱网和代表性服务器负载未通过不得宣称完成。
 
-继续阅读：`unity-client-networking.md`、`game-server-authority.md`、`verified-local-battle.md`、`data-operations-and-cloud.md`。
+继续阅读：`unity-client-networking.md`、`game-server-authority.md`、`verified-local-battle.md`、`data-operations-and-cloud.md`、`server-performance-concurrency.md`。

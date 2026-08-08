@@ -287,3 +287,111 @@ The same project later exposed a second class of reusable problems on a Huawei A
 - The backend suite passed 100 tests, the Unity suite passed 115 tests, and the authority validation suite passed after the fixes.
 
 These results are evidence for the methods, not universal latency promises. New games must repeat the deterministic, weak-network, device, security, and settlement checks in `checklists/online-game-acceptance.md`.
+
+
+## Follow-up: Production-like ECS, Capacity, and Motion Incident Evidence
+
+The project then moved its integration backend from a temporary Quick Tunnel path to a Beijing ECS direct HTTPS/WSS path. Quick Tunnel remained useful only for short-lived development acceptance; the fixed ECS endpoint removed an avoidable relay and made load tests reproducible. The server-side deployment used containers, loopback-only application/database ports, a public reverse proxy on 80/443, TLS, health checks, image-based rollback, and environment isolation.
+
+### Define a Battle Before Quoting Capacity
+
+A statement such as “this server supports N battles” is meaningless unless the workload is fixed. The TF_2D capacity run recorded at least:
+
+- one active player and one authoritative/verified battle session;
+- target Tick rate and snapshot/input frequency;
+- battle duration and warm-up;
+- active enemies, projectiles, skills and spawn curve;
+- verification/checkpoint and database write frequency;
+- connection activity, request sizes and weak-network behavior;
+- p50/p95/p99 latency, error rate, CPU, RSS, GC, database and network saturation.
+
+The first tested 4-vCPU/8-GiB integration state used **15 concurrent battles as a soft operating ceiling and 20 as a temporary hard ceiling**; the original 30/50/100 breakpoint runs exceeded acceptable behavior. Those values are historical, not the final R10 result.
+
+A later R10 optimization cycle corrected a hidden workload error: early “180-second” tests stopped being fully loaded when battles ended after roughly 60–86 seconds. The load generator was changed to replace terminal battles until the common deadline. Under that sustained model, the Stage33 integration image produced:
+
+| Load | Result | p95 | API CPU average / peak | Decision |
+| --- | ---: | ---: | ---: | --- |
+| 30 × 180 seconds | 30/30 | 150.15 ms | 51.83% / 84.11% | Green target |
+| 35 × 120 seconds, qualifier + three repeats | all 35/35 | 149.90–150.32 ms | peak 78.12–84.63% | Green, thin margin |
+| 40 × 120 seconds, first round | 40/40 | 150.48 ms | 57.73% / 98.86% | Red; stop |
+
+The 40-battle sample is the useful lesson: business success and a healthy p95 did not override a failed resource gate. The team stopped the remaining 40-battle rounds and did not run 45/50. Thirty battles became the operating-planning target; 35 remained an experimental edge, not comfortable capacity.
+
+At the time this knowledge was recorded, the Stage33 image was built from an isolated, uncommitted TF_2D R10 worktree and had not been merged into the TF_2D `main` branch. This preserves the distinction between deployed evidence and repository state.
+
+### Zero-Rule-Change Methods That Moved the Boundary
+
+- replace 25-ms full database/checkpoint scans with startup recovery, an in-memory active registry and low-frequency ID reconciliation;
+- keep one deterministic simulation resident per battle instead of decoding/rebuilding it every Tick;
+- separate private 20-Hz state from 10-Hz presentation encoding while preserving urgent events;
+- use stable logical lanes with bounded global simulation/checkpoint slots and single-writer ownership per battle;
+- atomically merge heartbeat/control updates so an older snapshot cannot overwrite a newer Tick;
+- narrow movement SQL to required fields, reuse resident authoritative state for reliable commands and enable bounded prepared statements;
+- decouple database heartbeat persistence from WSS snapshot publication;
+- pool canonical JSON, envelope and gzip buffers; reuse proven delta/checksum work without changing wire bytes;
+- replace repeated candidate scans with result-equivalent direction hulls and resident projectile collections.
+
+None of these methods reduced spawn counts, movement/skill rules, Tick, snapshot/input cadence, projectile checks, animation timing or anti-cheat validation. More aggressive concurrency, a one-round-trip movement candidate and a value-type enemy snapshot were rejected when measurements or correctness risk did not justify them.
+
+### Database Retention Before Performance Conclusions
+
+The integration database had accumulated about 180,000 replay checkpoints (about 494 MiB) and 220,000 input-history rows. Old load-test data can increase index/cache pressure, vacuum work, backup size and query cost, but deletion is not automatically a CPU optimization.
+
+The safe order is:
+
+1. make and verify a restorable backup;
+2. classify production facts, active battles, recent diagnostics and disposable load-test data;
+3. define retention by environment and table purpose;
+4. delete in bounded batches with observability;
+5. run the database's appropriate vacuum/analyze/index maintenance;
+6. compare identical load tests before and after;
+7. keep the cleanup job and retention policy in version control.
+
+### AOI Decision
+
+A cross-linked orthogonal list was reviewed but not adopted as the default. It can be useful for specialized 2D sweep workloads, but has higher mutation complexity and worse fit for frequent spawn/despawn than a simple grid.
+
+The implemented direction was an **adaptive spatial hash/grid**:
+
+- use a direct scan below a measured entity threshold;
+- switch to nearby-cell lookup above the threshold;
+- choose cell size from actual query radii and density;
+- pool buckets/buffers and expose candidates, accepted results, cells visited and stage timings;
+- preserve the old implementation behind a switch for A/B and rollback.
+
+The decision is workload-driven. A different game should profile before selecting a spatial index.
+
+### Root Cause of the Last Visible Small Displacement
+
+Repeated tuning of interpolation and network thresholds did not solve the issue. A same-frame trace finally separated four facts: input, local deterministic state, authority state and rendered state.
+
+Evidence from the failing build showed:
+
+- input was already zero and the battle state was stationary;
+- the remaining trace reason was `stationary_reconciliation`;
+- rendered position and authoritative position still differed by roughly one world unit;
+- an old deterministic presentation delta of about `0.125583336` matched the phone-observed displacement (about `0.1255836`).
+
+This proved the visible shift was not new server movement or a missing joystick release. The presentation layer was still consuming an old reconciliation delta after input became zero or a skill-selection pause closed.
+
+The verified fix was:
+
+1. introduce an explicit `stationary_hold` presentation state when input is zero and no new authoritative motion exists;
+2. clear residual presentation velocity and movement animation;
+3. stop consuming the historical reconciliation delta while held;
+4. preserve the last valid facing instead of replacing it with the zero vector or a default right-facing direction;
+5. exit the hold only on new input, a newer authoritative state or an explicit recovery transition;
+6. retain the server-authoritative position and all combat/economy rules unchanged.
+
+The release trace passed all recorded movement/skill-modal scenarios, and the user confirmed that continuous direction changes followed by joystick release, plus repeated skill selections, no longer produced visible displacement. Facing preservation has its own acceptance item and should be signed off separately on both left- and right-facing cases.
+
+### Resume and Diagnostics Lessons
+
+- A resumable fight is identified by the same `battleId`, not by starting a visually similar new battle.
+- Persistent pause time (including a pending skill offer) must survive process death; wall-clock time while stopped must not advance battle Tick.
+- A pending skill offer must be restored without applying a choice the player did not make.
+- Clipboard reports should be compact and current-build-specific.
+- Export success must be based on write/readback verification, not merely the absence of a thrown exception.
+- Unity paths such as `Application.persistentDataPath` must be obtained on the main thread and passed to background file work as plain strings.
+
+For the complete chronological evidence, implementation artifacts, commands, failure modes and reusable instructions, read [TF_2D Engineering and Incident-Resolution Handbook](tf2d-engineering-handbook.md). For a shorter project-neutral procedure, read [Online Battle Incident Response](online-game-incident-response.md).

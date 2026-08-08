@@ -45,12 +45,15 @@ Use this sequence when the project includes online accounts, cloud saves, networ
 
 1. Read `docs/online-game-architecture.md` and choose the authority mode per gameplay type.
 2. Read `docs/unity-client-networking.md` before changing input, prediction, presentation, recovery, or Android lifecycle code.
-3. Read `docs/game-server-authority.md` before defining battle protocols, settlement, ledgers, reconnect, or anti-cheat.
-4. For ordinary single-player PvE, evaluate `docs/verified-local-battle.md` to remove RTT from controls without trusting client rewards.
-5. Read `docs/data-operations-and-cloud.md` for Excel configuration, analytics, secrets, deployment, and cloud migration.
-6. Read `docs/cloud-game-server-deployment-runbook.md` before provisioning or changing a public game server, TLS/WSS gateway, certificate renewal, or cloud rollback path.
-7. Implement cross-runtime deterministic golden tests before switching settlement authority.
-8. Run `checklists/online-game-acceptance.md` on real Android devices and weak networks.
+3. For an active gameplay, movement, resume, settlement, Android, DIAG, or latency incident, read `docs/online-game-incident-response.md` and follow its evidence-first loop before tuning thresholds.
+4. Read `docs/game-server-authority.md` before defining battle protocols, settlement, ledgers, reconnect, or anti-cheat.
+5. For ordinary single-player PvE, evaluate `docs/verified-local-battle.md` to remove RTT from controls without trusting client rewards.
+6. Read `docs/data-operations-and-cloud.md` for Excel configuration, analytics, secrets, deployment, and cloud migration.
+7. Read `docs/cloud-game-server-deployment-runbook.md` before provisioning or changing a public game server, TLS/WSS gateway, certificate renewal, or cloud rollback path.
+8. Read `docs/server-performance-concurrency.md` before capacity optimization, load testing, concurrency tuning, caching, database scaling, overload protection, or autoscaling work.
+9. For realtime battle capacity work, write down player-experience and anti-cheat invariants before implementation. Changing Tick, snapshot/input cadence, spawning, movement, skills, projectiles, animation timing, prediction, or settlement requires explicit product-owner approval.
+10. Implement cross-runtime deterministic golden tests before switching settlement authority.
+11. Run `checklists/online-game-acceptance.md` on real Android devices, weak networks, and representative server load.
 
 ### Online Game Trust Rules
 
@@ -61,6 +64,11 @@ Use this sequence when the project includes online accounts, cloud saves, networ
 - Treat platform integrity, obfuscation, APK hashes, root/emulator signals, and IP reputation as risk signals, not sole authority.
 - Keep secrets out of Git, APKs, logs, screenshots, diagnostics, and prompts.
 - Label unimplemented transport or infrastructure choices as future options, never as verified results.
+- Diagnose movement and presentation incidents with same-frame input, authority, prediction, Transform, UI, and pause evidence; reproduce the observed magnitude in a deterministic failing test before fixing.
+- Distinguish current source, current automation, actual deployment state, and exact-build device observations; never let historical chat override newer evidence.
+- Establish a reproducible capacity baseline before optimization. Keep every queue, pool, cache, retry, payload, and timeout bounded; validate changes with stable throughput, p95/p99, error rate, and resource-per-request rather than average latency alone.
+- A timed battle load test must replenish terminal sessions until the deadline; otherwise a nominal 180-second run may contain only one minute of real concurrency.
+- Treat resource gates independently from business success. A run with 100% clients and good p95 is still red when CPU, GC, memory, database, restart, OOM, consistency, or anti-cheat gates fail.
 
 ## Optional Sequence: Local SVN Art Repository
 
@@ -110,6 +118,8 @@ After login, verify with:
 & 'E:\GitHub\gh.exe' auth status
 ```
 
+If `git push`/`ls-remote` repeatedly times out but `gh api user` succeeds, treat Git transport and API connectivity as separate evidence. First verify the active repo-local proxy and try one bounded HTTP/1.1 compatibility attempt. With explicit publication authorization, a clean intended scope, and a new non-default branch, the Git Data API is an advanced fallback: create blobs → tree → commit → branch ref, verify blob/tree/ref and PR file hashes, and never write `main` directly. Read `docs/environment-setup.md` for the full recovery sequence.
+
 ## Expected Deliverables
 
 - A clean `main` branch.
@@ -118,4 +128,4 @@ After login, verify with:
 - A reviewed restructure commit or merge commit.
 - Documentation explaining structure, Git workflow, and art policy.
 - Verification evidence from Git and Unity.
-- For online games: an authority decision per gameplay type, protocol/version contract, deterministic tests, real-device weak-network evidence, idempotent settlement, actionable DIAG, and a rollback plan.
+- For online games: an authority decision per gameplay type, protocol/version contract, deterministic tests, real-device weak-network evidence, idempotent settlement, actionable DIAG, an incident evidence chain, and a rollback plan.

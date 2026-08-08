@@ -62,6 +62,27 @@ git config --global http.proxy http://127.0.0.1:33210
 
 The global command above is shown as a warning example. Prefer local config for project work.
 
+## When `git push` Fails But GitHub API Still Works
+
+A reset or port-443 timeout from `git push` does not always mean the token is invalid. Git HTTPS transport and GitHub's REST API can take different local network paths. Diagnose them separately:
+
+```powershell
+git ls-remote origin refs/heads/main
+gh auth status
+gh api user --jq .login
+```
+
+Use this order:
+
+1. Confirm the repository, branch, staged scope and remote URL. Do not recommit or rewrite history just because transport failed.
+2. Retry only after checking the active repo-local proxy. `git -c http.version=HTTP/1.1 push ...` is a bounded compatibility test, not a permanent cure.
+3. If Git transport remains unavailable but `gh api` is authenticated, the user has explicitly authorized publication, and a new non-default branch is being created, the Git Data API can be used as an advanced fallback: upload blobs, create a tree, create a commit, then create the branch ref.
+4. Compare every uploaded blob SHA with `git rev-parse HEAD:<path>`, the remote tree SHA with `git show -s --format=%T HEAD`, and the final PR head/file list with the intended scope. Never update `main` directly through this fallback.
+5. GitHub may serialize commit metadata or the final message newline differently, so the commit SHA can differ even when the tree is identical. Treat verified blob/tree equality as content evidence, then fetch and align the local branch when normal Git transport is available.
+6. Remove temporary request files and verify that the PR is open, mergeable, targets the expected base and contains only intended files.
+
+This fallback solved a real publication where three HTTPS pushes failed with connection reset/timeouts while `gh api user` stayed healthy. The published branch was accepted only after all 11 blob hashes, the full tree hash, branch ref and PR file list matched. Prefer ordinary `git push`; use the API path only as a controlled recovery procedure.
+
 ## Create A Private GitHub Repository
 
 Use:

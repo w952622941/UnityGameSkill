@@ -75,3 +75,5 @@ If using UGit:
 - [ ] GUI branch list matches CLI branches.
 - [ ] No unexpected local changes are shown.
 - [ ] If UGit fails but CLI works, compare proxy and credential configuration.
+- [ ] If Git transport fails but `gh api` works, record both results instead of treating the problem as an authentication failure.
+- [ ] If the Git Data API fallback was explicitly authorized, verify every blob SHA, the complete tree SHA, the new non-default branch ref, PR base/head and PR file list; never write the default branch directly.
